@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
-const Book = require('./models/Book');
+const Book = require('../models/Book');
 
 const jsonFilePath = path.join(__dirname, 'books.json');
 
