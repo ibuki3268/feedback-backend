@@ -14,6 +14,15 @@ const BookSchema = new mongoose.Schema({
   tags: {
     type: [String],
     default: []
+  },
+  registeredBy: {
+    type: mongoose.Schema.Types.ObjectId, // ユーザーのIDを保存する型
+    ref: 'User', // Userモデルを参照する
+    required: true // 必須項目にする
+  },
+  registeredAt: {
+    type: Date,
+    default: Date.now
   }
 });
 
