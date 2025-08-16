@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const Book = require('../models/Book');
 const Tag = require('../models/Tag');
+const auth = require('../middleware/auth');
 
 // POST /api/books - 新しい本を登録
-router.post('/', async (req, res) => {
+// ★ 第2引数にauthを追加して、ログイン必須のルートにする
+router.post('/', auth, async (req, res) => {
   const { isbn, title, tags } = req.body;
 
   try {
@@ -30,7 +32,8 @@ router.post('/', async (req, res) => {
     book = new Book({
       isbn,
       title,
-      tags
+      tags,
+      registeredBy: req.user.id
     });
 
     await book.save();
