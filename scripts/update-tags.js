@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const Book = require('./models/Book');
+const Book = require('../models/Book');
 
 // 先ほど作成したISBNとタグの対応リスト
 const tagData = [

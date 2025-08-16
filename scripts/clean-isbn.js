@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const Book = require('./models/Book');
+const Book = require('../models/Book');
 
 const cleanIsbnWhitespace = async () => {
   try {
