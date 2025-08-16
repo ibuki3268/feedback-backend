@@ -9,8 +9,8 @@ const TitleSchema = new mongoose.Schema({
   condition: {
     type: {
       type: String,
-      // "TOTAL_BOOKS" (総読書数) or "TAG_BOOKS" (特定タグの読書数)
-      enum: ['TOTAL_BOOKS', 'TAG_BOOKS'],
+      // "TOTAL_BOOKS" (総読書数) "TAG_BOOKS" (特定タグの読書数)
+      enum: ['TOTAL_BOOKS', 'GENRE_BOOKS', 'MULTI_LANGUAGE', 'SPECIFIC_TAG'],
       required: true
     },
     // TAG_BOOKSの場合、対象のタグ名 (例: "Unity")
