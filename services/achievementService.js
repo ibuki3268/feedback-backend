@@ -2,50 +2,60 @@
 const User = require('../models/User');
 const Title = require('../models/Title');
 const BorrowingHistory = require('../models/BorrowingHistory');
-const Book = require('../models/Book');
+
+// ★ タグとジャンルの対応表を定義
+const TAG_GENRE_MAP = {
+  'ゲーム開発': ['Unity', 'Unreal Engine', 'C#', 'C++', 'ゲーム開発', 'アルゴリズム', '物理シミュレーション', 'ティラノスクリプト', 'PlayFab'],
+  'デザイン・CG': ['アート', '3DCG', '作画', 'デザイン', 'Maya', 'Blender', 'Photoshop', 'Illustrator', 'Live2D', 'アニメーション', 'リギング', 'モデリング'],
+  'AI': ['AI', '機械学習', '自然言語処理', '統計学'],
+  'Web開発': ['Webフロントエンド', 'Webフレームワーク', 'HTML', 'CSS', 'JavaScript', 'React', 'PHP', 'Ruby', 'Ruby on Rails', 'Laravel', 'Go', 'Web技術', 'API'],
+  'プログラミング言語': ['C#', 'C++', 'Java', 'Ruby', 'Go', 'PHP', 'C言語', 'JavaScript']
+};
 
 async function checkAndAwardTitles(userId) {
-  // 1. ユーザー情報と、全ての称号定義を取得
   const user = await User.findById(userId);
   const allTitles = await Title.find({});
-  
-  // 2. ユーザーがまだ獲得していない称号のみをチェック対象にする
-  const titlesToCheck = allTitles.filter(title => 
-    !user.achievedTitles.includes(title._id)
-  );
+  const titlesToCheck = allTitles.filter(title => !user.achievedTitles.some(t => t.equals(title._id)));
 
-  if (titlesToCheck.length === 0) return; // チェックする新しい称号がなければ終了
+  if (titlesToCheck.length === 0) return;
 
-  // 3. ユーザーの返却済みの貸し出し履歴を取得
   const userHistory = await BorrowingHistory.find({ user: userId, returnedDate: { $ne: null } })
-    .populate('book', 'tags'); // Bookモデルからtagsの情報も持ってくる
+    .populate('book', 'tags');
 
-  // 4. 各称号の条件をループでチェック
   for (const title of titlesToCheck) {
     let isAchieved = false;
     const condition = title.condition;
 
     if (condition.type === 'TOTAL_BOOKS') {
-      // 総読書数の条件チェック
-      if (userHistory.length >= condition.count) {
-        isAchieved = true;
-      }
-    } else if (condition.type === 'TAG_BOOKS') {
-      // 特定タグの読書数の条件チェック
-      const tagCount = userHistory.filter(h => h.book.tags.includes(condition.tag)).length;
-      if (tagCount >= condition.count) {
-        isAchieved = true;
-      }
+      if (userHistory.length >= condition.count) isAchieved = true;
+    
+    } else if (condition.type === 'GENRE_BOOKS') {
+      const genreTags = TAG_GENRE_MAP[condition.genre] || [];
+      const count = userHistory.filter(h => h.book.tags.some(tag => genreTags.includes(tag))).length;
+      if (count >= condition.count) isAchieved = true;
+
+    } else if (condition.type === 'MULTI_LANGUAGE') {
+      const languageTags = new Set();
+      const languageGenre = TAG_GENRE_MAP['プログラミング言語'];
+      userHistory.forEach(h => {
+        h.book.tags.forEach(tag => {
+          if (languageGenre.includes(tag)) languageTags.add(tag);
+        });
+      });
+      if (languageTags.size >= condition.count) isAchieved = true;
+      
+    } else if (condition.type === 'SPECIFIC_TAG') {
+      const count = userHistory.filter(h => h.book.tags.some(tag => condition.tags.includes(tag))).length;
+      if (count >= condition.count) isAchieved = true;
     }
 
-    // 5. 条件を満たしていれば、ユーザーに称号を付与
     if (isAchieved) {
       user.achievedTitles.push(title._id);
     }
   }
 
-  // 6. 変更をデータベースに保存
   await user.save();
+  console.log(`ユーザー(${userId})の称号チェック完了`);
 }
 
 module.exports = { checkAndAwardTitles };
