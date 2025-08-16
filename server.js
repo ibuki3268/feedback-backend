@@ -16,6 +16,8 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/books', require('./routes/books'));
 app.use('/api/tags', require('./routes/tags'));
+app.use('/api/borrowings', require('./routes/borrowings'));
+app.use('/api/users', require('./routes/users'));
 
 // サーバーを起動
 const PORT = process.env.PORT || 5000;

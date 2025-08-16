@@ -19,6 +19,10 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now, // 登録日時（デフォルトで現在時刻）
   },
+  achievedTitles: [{
+    type: mongoose.Schema.Types.ObjectId, // 獲得した称号のIDを保存
+    ref: 'Title' // Titleモデルを参照
+  }]
 });
 
 // 設計図を元に「モデル」を作成し、外部から使えるようにする
