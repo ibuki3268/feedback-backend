@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 require('dotenv').config(); // .envファイルを読み込む
 
 const app = express();
@@ -8,6 +9,10 @@ const app = express();
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDBに接続しました'))
   .catch(err => console.error('MongoDBへの接続に失敗しました:', err));
+
+  // CORSを有効にする
+// これにより、全てのオリジンからのリクエストが許可される（開発中はこれでOK）
+app.use(cors());
 
 // JSON形式のリクエストを扱えるようにする
 app.use(express.json());
